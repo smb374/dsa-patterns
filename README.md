@@ -13,6 +13,10 @@ Build a prefix sum array such that
 
 Gradual prefix sum. Note that we need to interpret 0 as -1.
 
+<details>
+
+<summary>Code</summary>
+
 ```cpp
 int findMaxLength(vector<int>& nums) {
     int n = nums.size(), sum = 0, len = 0;
@@ -40,11 +44,17 @@ int findMaxLength(vector<int>& nums) {
 }
 ```
 
+</details>
+
 ### [560. Subarray Sum Equals K (Medium)](/cpp/0560.subarray-sum-equals-k/question.md)
 
 Gradual prefix sum. Note that we should match `k` in building loop
 before adding `table[sum]`, otherwise it could match on extras
 when `k = 0` if we choose other approach.
+
+<details>
+
+<summary>Code</summary>
 
 ```cpp
 int subarraySum(vector<int>& nums, int k) {
@@ -67,6 +77,8 @@ int subarraySum(vector<int>& nums, int k) {
     return count;
 }
 ```
+
+</details>
 
 ## Two Pointers
 
