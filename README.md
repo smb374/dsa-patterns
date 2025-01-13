@@ -82,6 +82,114 @@ int subarraySum(vector<int>& nums, int k) {
 
 ## Two Pointers
 
+### [167. Two Sum II - Input Array Is Sorted (Medium)](/cpp/0167.two-sum-ii-input-array-is-sorted/question.md)
+
+Two pointer starting on both sides,
+advance right if sum is bigger, left if sum is smaller.
+
+<details>
+<summary>Code</summary>
+
+```cpp
+vector<int> twoSum(vector<int>& numbers, int target) {
+    int n = numbers.size();
+    int i = 0, j = n - 1;
+    while (i < j) {
+        int sum = numbers[i] + numbers[j];
+        if (sum > target) {
+            j--;
+        } else if (sum < target) {
+            i++;
+        } else {
+            return {i + 1, j + 1};
+        }
+    }
+
+    return {-1, -1};
+}
+```
+
+</details>
+
+### [15. 3Sum (Medium)](/cpp/0015.3sum/question.md)
+
+Sort the array first then for `i` in `[0..n-2]`:
+Two pointers starting from `i+1` and `n-1`,
+`j++` if sum is smaller, `k--` if sum is bigger.
+
+Remember to skip identical numbers as the problem requests unique triplets.
+
+<details>
+<summary>Code</summary>
+
+```cpp
+vector<vector<int>> threeSum(vector<int>& nums) {
+    int n = nums.size();
+    vector<vector<int>> result;
+    sort(nums.begin(), nums.end());
+
+    for (int i = 0; i < n - 2; i++) {
+        // Skip same numbers.
+        if (i != 0 && nums[i] == nums[i - 1]) {
+            continue;
+        }
+        int x = nums[i];
+        int j = i + 1, k = n - 1;
+        while (j < k) {
+            int y = nums[j], z = nums[k];
+            int sum = x + y + z;
+
+            if (sum < 0) {
+                j++;
+            } else if (sum > 0) {
+                k--;
+            } else {
+                result.push_back({x, y, z});
+                // Skip same numbers.
+                while (j < k && nums[j] == y)
+                    j++;
+                while (j < k && nums[k] == z)
+                    k--;
+            }
+        }
+    }
+
+    return result;
+}
+```
+
+</details>
+
+### [11. Container With Most Water (Medium)](/cpp/0011.container-with-most-water/question.md)
+
+Two pointer starting on both sides, advance the one with lower height.
+
+<details>
+<summary>Code</summary>
+
+```cpp
+int maxArea(vector<int>& height) {
+    int n = height.size();
+    int i = 0, j = n - 1, area = numeric_limits<int>::min();
+
+    while (i < j) {
+        int hl = height[i], hr = height[j], width = j - i;
+
+        if (hl < hr) {
+            area = max(area, hl * width);
+            i++;
+        } else {
+            area = max(area, hr * width);
+            j--;
+        }
+    }
+
+    return area;
+}
+```
+
+</details>
+
 ## Sliding Window
 
 ## Fast & Slow Pointers
