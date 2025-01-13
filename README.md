@@ -318,6 +318,109 @@ string minWindow(string s, string t) {
 
 ## Fast & Slow Pointers
 
+### [141. Linked List Cycle (Easy)](/cpp/0141.linked-list-cycle/question.md)
+
+Use slow-fast pointer to detect cycle
+
+<details>
+<summary>Code</summary>
+
+```cpp
+bool hasCycle(ListNode* head) {
+    if (!head)
+        return false;
+    ListNode *slow = head, *fast = head;
+
+    while (fast && fast->next) {
+        slow = slow->next;
+        fast = fast->next->next;
+        if (slow == fast) {
+            return true;
+        }
+    }
+
+    return false;
+}
+```
+
+</details>
+
+### [202. Happy Number (Easy)](/cpp/0202.happy-number/question.md)
+
+Use slow-fast pointer with custom `next` function based on the rule.
+
+<details>
+<summary>Code</summary>
+
+```cpp
+int next(int n) {
+    int sum = 0;
+    while (n > 0) {
+        int digit = n % 10;
+        sum += digit * digit;
+        n /= 10;
+    }
+
+    return sum;
+}
+
+bool isHappy(int n) {
+    if (n == 1) {
+        return true;
+    } else if (!n) {
+        return false;
+    }
+
+    int slow = n, fast = n;
+
+    while (fast != 1) {
+        slow = next(slow);
+        fast = next(next(fast));
+        if (slow == fast && slow != 1) {
+            return false;
+        }
+    }
+
+    return true;
+}
+```
+
+</details>
+
+### [287. Find the Duplicate Number (Medium)](/cpp/0287.find-the-duplicate-number/question.md)
+
+`O(1)` space solutions:
+
+- Use slow-fast pointers and view the numbers in the list as next index to travel.
+  (Floyd's Tortoise and Hare Algorithm)
+- Open a `bool [100001]` array to record visited numbers.
+
+<details>
+<summary>Code</summary>
+
+```cpp
+int findDuplicate(vector<int>& nums) {
+    int slow = nums[0];
+    int fast = nums[0];
+
+    do {
+        slow = nums[slow];
+        fast = nums[nums[fast]];
+    } while (slow != fast);
+
+    slow = nums[0];
+
+    while (slow != fast) {
+        slow = nums[slow];
+        fast = nums[fast];
+    }
+
+    return fast;
+}
+```
+
+</details>
+
 ## In-Place Reverse Linked List
 
 ## Monotonic Stack
