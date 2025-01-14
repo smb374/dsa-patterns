@@ -834,7 +834,210 @@ int eraseOverlapIntervals(vector<vector<int>>& intervals) {
 
 ## Modified Binary Search
 
+### [33. Search in Rotated Sorted Array (Medium)](/cpp/0033.search-in-rotated-sorted-array/question.md)
+
+Use the property of rotated sort to check which half is sorted and move the boundary.
+
+<details>
+<summary>Code</summary>
+
+```cpp
+int search(vector<int>& nums, int target) {
+    int i = 0, j = nums.size() - 1;
+    // rotate sorted: s[0] > s[n-1], s[pivot] is the highest point
+    while (i <= j) {
+        int mid = i + ((j - i) / 2);
+        if (nums[mid] == target) {
+            // Case 1: Found target
+            return mid;
+        } else if (nums[mid] >= nums[i]) {
+            // Case 2: mid's left is sorted.
+            if (target >= nums[i] && target < nums[mid]) {
+                // target is on left subarray
+                j = mid - 1;
+            } else {
+                // target is on right subarray
+                i = mid + 1;
+            }
+        } else {
+            // Case 3: mid's right is sorted.
+            if (target <= nums[j] && target > nums[mid]) {
+                // target is on right subarray
+                i = mid + 1;
+            } else {
+                // target is on left subarray
+                j = mid - 1;
+            }
+        }
+    }
+
+    return -1;
+}
+```
+
+</details>
+
+### [153. Find Minimum in Rotated Sorted Array (Medium)](/cpp/0153.find-minimum-in-rotated-sorted-array/question.md)
+
+Use the property of rotated sort to find the minimal.
+
+<details>
+<summary>Code</summary>
+
+```cpp
+int findMin(vector<int>& nums) {
+    // Search the center
+    int i = 1, j = nums.size() - 2;
+
+    while (i <= j) {
+        int mid = i + ((j - i) / 2);
+        if (nums[mid - 1] > nums[mid] && nums[mid + 1] > nums[mid]) {
+            // Case 1: found minimal
+            return nums[mid];
+        } else if (nums[mid] > nums[0]) {
+            // Case 2: mid is at the left of pivot
+            i = mid + 1;
+        } else {
+            // Case 3: mid is at the right of pivot.
+            j = mid - 1;
+        }
+    }
+    // Not rotate sorted.
+    return min(nums[0], nums[nums.size() - 1]);
+}
+```
+
+</details>
+
+### [240. Search a 2D Matrix II (Medium)](/cpp/0240.search-a-2d-matrix-ii/question.md)
+
+Walk from bottom left: `matrix[r][c] > t => r--`, `matrix[r][c] < t => c++`
+
+<details>
+<summary>Code</summary>
+
+```cpp
+bool searchMatrix(vector<vector<int>>& matrix, int target) {
+    int row = matrix.size() - 1;
+    int col = 0;
+    // Walk from bottom left
+    // since column 0 is the smallest in a row
+    // and row n-1 is the biggest in a column
+    while (row >= 0 && col < matrix[0].size()) {
+        if (matrix[row][col] > target) {
+            // walk up
+            row--;
+        } else if (matrix[row][col] < target) {
+            // walk right
+            col++;
+        } else {
+            return true;
+        }
+    }
+
+    return false;
+}
+```
+
+</details>
+
 ## Binary Tree Traversal
+
+### [257. Binary Tree Paths (Easy)](/cpp/0257.binary-tree-paths/question.md)
+
+DFS post-order explore
+
+<details>
+<summary>Code</summary>
+
+```cpp
+void dfs(TreeNode* node, string path, vector<string>& res) {
+    if (node) {
+        path += to_string(node->val);
+        if (!node->left && !node->right) {
+            res.push_back(path);
+        } else {
+            path += "->";
+            dfs(node->left, path, res);
+            dfs(node->right, path, res);
+        }
+    }
+}
+
+vector<string> binaryTreePaths(TreeNode* root) {
+    vector<string> res;
+    string path;
+
+    dfs(root, path, res);
+
+    return res;
+}
+```
+
+</details>
+
+### [230. Kth Smallest Element in a BST (Medium)](/cpp/0230.kth-smallest-element-in-a-bst/question.md)
+
+DFS in-order traversal to build a list and get `k-1`th element from that list.
+
+<details>
+<summary>Code</summary>
+
+```cpp
+void dfs(TreeNode* node, vector<int>& path) {
+    if (node) {
+        dfs(node->left, path);
+        path.push_back(node->val);
+        dfs(node->right, path);
+    }
+}
+
+int kthSmallest(TreeNode* root, int k) {
+    vector<int> path;
+
+    dfs(root, path);
+
+    if (path.size() >= k) {
+        return path[k - 1];
+    } else {
+        return -1;
+    }
+}
+```
+
+</details>
+
+### [124. Binary Tree Maximum Path Sum (Hard)](/cpp/0124.binary-tree-maximum-path-sum/question.md)
+
+DFS post-order traversal. Remember the result is to choose a branch.
+
+<details>
+<summary>Code</summary>
+
+```cpp
+int dfs(TreeNode* node, int& max_sum) {
+    if (!node) {
+        return 0;
+    }
+
+    int lgain = max(dfs(node->left, max_sum), 0);
+    int rgain = max(dfs(node->right, max_sum), 0);
+
+    max_sum = max(max_sum, node->val + lgain + rgain);
+
+    return max(node->val + lgain, node->val + rgain);
+}
+
+int maxPathSum(TreeNode* root) {
+    int max_sum = numeric_limits<int>::min();
+
+    dfs(root, max_sum);
+
+    return max_sum;
+}
+```
+
+</details>
 
 ## DFS
 
