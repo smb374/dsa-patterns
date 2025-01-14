@@ -423,7 +423,226 @@ int findDuplicate(vector<int>& nums) {
 
 ## In-Place Reverse Linked List
 
+### [206. Reverse Linked List (Easy)](/cpp/0206.reverse-linked-list/question.md)
+
+<details>
+<summary>Code</summary>
+
+```cpp
+ListNode* reverseList(ListNode* head) {
+    ListNode *prev = nullptr, *curr = head;
+
+    while (curr) {
+        ListNode* next = curr->next;
+        curr->next = prev;
+        prev = curr;
+        curr = next;
+    }
+
+    return prev;
+}
+```
+
+</details>
+
+### [92. Reverse Linked List II (Medium)](/cpp/0092.reverse-linked-list-ii/question.md)
+
+<details>
+<summary>Code</summary>
+
+```cpp
+ListNode* reverse(ListNode* head) {
+    ListNode *prev = nullptr, *curr = head, *next = nullptr;
+
+    while (curr) {
+        next = curr->next;
+        curr->next = prev;
+        prev = curr;
+        curr = next;
+    }
+
+    return prev;
+}
+
+ListNode* reverseBetween(ListNode* head, int left, int right) {
+    ListNode *prev = nullptr, *curr = head;
+    int count = 1;
+
+    // Get start node
+    while (count != left) {
+        prev = curr;
+        curr = curr->next;
+        count++;
+    }
+    ListNode* start = curr;
+    // Get end node
+    while (count != right) {
+        curr = curr->next;
+        count++;
+    }
+    ListNode* end = curr->next;
+    // split the end and revers the list.
+    curr->next = nullptr;
+    ListNode* new_head = reverse(start);
+    // prev of start is previous node of start before reverse.
+    if (prev) {
+        prev->next = new_head;
+    }
+    // walk to list end and append end node.
+    curr = new_head;
+    while (curr->next) {
+        curr = curr->next;
+    }
+    curr->next = end;
+    // check if left is 1 (reverse strarts at head)
+    return (left == 1) ? new_head : head;
+}
+```
+
+</details>
+
+### [24. Swap Nodes in Pairs (Medium)](/cpp/0024.swap-nodes-in-pairs/question.md)
+
+<details>
+<summary>Code</summary>
+
+```cpp
+ListNode* swapPairs(ListNode* head) {
+    if (!head)
+        return head;
+    ListNode dummy(-1);
+    dummy.next = head;
+    ListNode *n1 = head, *n2 = head->next, *prev = &dummy;
+    if (!n2)
+        return head;
+
+    while (n1 && n2) {
+        // prev -> n1 -> n2 -> next
+        ListNode* next = n2->next;
+        // (prev -> n1, n2) -> next
+        n1->next = next;
+        // (prev, n2) -> n1 -> next
+        n2->next = n1;
+        // prev -> n2 -> n1 -> next
+        prev->next = n2;
+        prev = n1;
+        if (next && next->next) {
+            n1 = next;
+            n2 = next->next;
+        } else {
+            break;
+        }
+    }
+
+    return dummy.next;
+}
+```
+
+</details>
+
 ## Monotonic Stack
+
+### [496. Next Greater Element I (Easy)](/cpp/0496.next-greater-element-i/question.md)
+
+Use a monotonic decrease stack to detect and store next greater element.
+
+<details>
+<summary>Code</summary>
+
+```cpp
+vector<int> nextGreaterElement(vector<int>& nums1, vector<int>& nums2) {
+    stack<int> s;
+    unordered_map<int, int> table;
+    // Preprocess nums2 with a monotonic stack
+    // and store stack top's next greater value in the table.
+    for (int num : nums2) {
+        while (!s.empty() && num > s.top()) {
+            table[s.top()] = num;
+            s.pop();
+        }
+        s.push(num);
+    }
+
+    while (!s.empty()) {
+        table[s.top()] = -1;
+        s.pop();
+    }
+
+    vector<int> res;
+
+    for (int num : nums1) {
+        res.push_back(table[num]);
+    }
+
+    return res;
+}
+```
+
+</details>
+
+### [739. Daily Temperatures (Medium)](/cpp/0739.daily-temperatures/question.md)
+
+Use a monotonic decrease stack to find the distance of warmer days and stack top.
+
+<details>
+<summary>Code</summary>
+
+```cpp
+vector<int> dailyTemperatures(vector<int>& temperatures) {
+    stack<int> s;
+    int n = temperatures.size();
+    vector<int> res(n, 0);
+
+    for (int i = 0; i < n; i++) {
+        int t = temperatures[i];
+        while (!s.empty() && t > temperatures[s.top()]) {
+            res[s.top()] = i - s.top();
+            s.pop();
+        }
+        s.push(i);
+    }
+
+    return res;
+}
+```
+
+</details>
+
+### [84. Largest Rectangle in Histogram (Hard)](/cpp/0084.largest-rectangle-in-histogram/question.md)
+
+Use a monotonic increase stack.
+
+<details>
+<summary>Code</summary>
+
+```cpp
+int largestRectangleArea(vector<int>& heights) {
+    stack<int> s;
+    s.push(-1);
+    int amax = 0;
+
+    for (int i = 0; i < heights.size(); i++) {
+        while (s.top() != -1 && heights[i] < heights[s.top()]) {
+            int height = heights[s.top()];
+            s.pop();
+            int width = i - s.top() - 1;
+            amax = max(amax, width * height);
+        }
+        s.push(i);
+    }
+
+    while (s.top() != -1) {
+        int height = heights[s.top()];
+        s.pop();
+        int width = heights.size() - s.top() - 1;
+        amax = max(amax, width * height);
+    }
+
+    return amax;
+}
+```
+
+</details>
 
 ## Top-K Elements
 
