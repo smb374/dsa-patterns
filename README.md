@@ -646,7 +646,191 @@ int largestRectangleArea(vector<int>& heights) {
 
 ## Top-K Elements
 
+### [215. Kth Largest Element in an Array (Medium)](/cpp/0215.kth-largest-element-in-an-array/question.md)
+
+Use `nth_element`, which uses worst case linear time selection.
+
+<details>
+<summary>Code</summary>
+
+```cpp
+int findKthLargest(vector<int>& nums, int k) {
+    // O(n) selecttion algorithm
+    nth_element(nums.begin(), nums.begin() + k - 1, nums.end(),
+                std::greater<>{});
+
+    return nums[k - 1];
+}
+```
+
+</details>
+
+### [347. Top K Frequent Elements (Medium)](/cpp/0347.top-k-frequent-elements/question.md)
+
+Use a priority queue.
+
+<details>
+<summary>Code</summary>
+
+```cpp
+vector<vector<int>> kSmallestPairs(vector<int>& nums1, vector<int>& nums2,
+                                    int k) {
+    vector<vector<int>> ans;
+    priority_queue<pair<int, pair<int, int>>> pq;
+    for (int i = 0; i < nums1.size(); i++) {
+        for (int j = 0; j < nums2.size(); j++) {
+            int sum = nums1[i] + nums2[j];
+            if (pq.size() < k)
+                pq.push({sum, {nums1[i], nums2[j]}});
+            else if (sum < pq.top().first) {
+                pq.pop();
+                pq.push({sum, {nums1[i], nums2[j]}});
+            } else if (sum >= pq.top().first) {
+                break;
+            }
+        }
+    }
+    while (!pq.empty()) {
+        ans.push_back({pq.top().second.first, pq.top().second.second});
+        pq.pop();
+    }
+    return ans;
+}
+```
+
+</details>
+
+### [373. Find K Pairs with Smallest Sums (Medium)](/cpp/0373.find-k-pairs-with-smallest-sums/question.md)
+
+Use a priority queue with at most size `k`.
+
+<details>
+<summary>Code</summary>
+
+```cpp
+vector<vector<int>> kSmallestPairs(vector<int>& nums1, vector<int>& nums2,
+                                    int k) {
+    vector<vector<int>> ans;
+    priority_queue<pair<int, pair<int, int>>> pq;
+    for (int i = 0; i < nums1.size(); i++) {
+        for (int j = 0; j < nums2.size(); j++) {
+            int sum = nums1[i] + nums2[j];
+            if (pq.size() < k)
+                pq.push({sum, {nums1[i], nums2[j]}});
+            else if (sum < pq.top().first) {
+                pq.pop();
+                pq.push({sum, {nums1[i], nums2[j]}});
+            } else if (sum >= pq.top().first) {
+                break;
+            }
+        }
+    }
+    while (!pq.empty()) {
+        ans.push_back({pq.top().second.first, pq.top().second.second});
+        pq.pop();
+    }
+    return ans;
+}
+```
+
+</details>
+
 ## Overlapping Intervals
+
+### [56. Merge Intervals (Medium)](/cpp/0056.merge-intervals/question.md)
+
+Sort the intervals by start time then push or merge to the result array.
+
+<details>
+<summary>Code</summary>
+
+```cpp
+vector<vector<int>> merge(vector<vector<int>>& intervals) {
+    sort(intervals.begin(), intervals.end(),
+            [](const vector<int>& a, const vector<int>& b) {
+                return a[0] < b[0];
+            });
+    vector<vector<int>> res;
+
+    for (vector<int>& i : intervals) {
+        if (res.empty() || i[0] > res.back()[1]) {
+            res.emplace_back(i);
+        } else {
+            int end = max(res.back()[1], i[1]);
+            res.back()[1] = end;
+        }
+    }
+
+    return res;
+}
+```
+
+</details>
+
+### [57. Insert Interval (Medium)](/cpp/0057.insert-interval/question.md)
+
+Add the new interval to intervals, and sort the intervals by start time
+then push or merge to the result array.
+
+<details>
+<summary>Code</summary>
+
+```cpp
+vector<vector<int>> insert(vector<vector<int>>& intervals,
+                            vector<int>& newInterval) {
+    intervals.emplace_back(newInterval);
+    sort(intervals.begin(), intervals.end(),
+            [](const vector<int>& a, const vector<int>& b) {
+                return a[0] < b[0];
+            });
+    vector<vector<int>> res;
+
+    for (vector<int>& i : intervals) {
+        if (res.empty() || i[0] > res.back()[1]) {
+            res.emplace_back(i);
+        } else {
+            int end = max(res.back()[1], i[1]);
+            int start = min(res.back()[0], i[0]);
+
+            res.back()[0] = start;
+            res.back()[1] = end;
+        }
+    }
+
+    return res;
+}
+```
+
+</details>
+
+### [435. Non-overlapping Intervals (Medium)](/cpp/0435.non-overlapping-intervals/question.md)
+
+Sort the intervals by end time and count the non-overlapping ones.
+Result is intervals size - non-overlapping intervals size.
+
+<details>
+<summary>Code</summary>
+
+```cpp
+int eraseOverlapIntervals(vector<vector<int>>& intervals) {
+    sort(intervals.begin(), intervals.end(),
+            [](const vector<int>& a, const vector<int>& b) {
+                return a[1] < b[1];
+            });
+
+    int count = 1, prev = 0;
+    for (int i = 1; i < intervals.size(); i++) {
+        if (intervals[i][0] >= intervals[prev][1]) {
+            prev = i;
+            count++;
+        }
+    }
+
+    return intervals.size() - count;
+}
+```
+
+</details>
 
 ## Modified Binary Search
 
