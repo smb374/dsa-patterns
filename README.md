@@ -1039,12 +1039,511 @@ int maxPathSum(TreeNode* root) {
 
 </details>
 
-## DFS
+## DFS & BFS
 
-## BFS
+### [133. Clone Graph (Medium)](/cpp/0133.clone-graph/question.md)
+
+DFS or BFS explore graph and clone the nodes
+
+<details>
+<summary>Code</summary>
+
+```cpp
+class Solution {
+  private:
+    unordered_map<Node*, Node*> visited;
+
+  public:
+    Node* cloneGraph(Node* node) {
+        if (!node)
+            return node;
+
+        if (visited.count(node)) {
+            return visited[node];
+        }
+
+        Node* cloned = new Node(node->val, {});
+
+        visited[node] = cloned;
+
+        for (Node* neighbor : node->neighbors) {
+            cloned->neighbors.push_back(cloneGraph(neighbor));
+        }
+
+        return cloned;
+    }
+};
+```
+
+</details>
+
+### [113. Path Sum II (Medium)](/cpp/0113.path-sum-ii/question.md)
+
+DFS explore until leaf then compare sum.
+
+<details>
+<summary>Code</summary>
+
+```cpp
+void dfs(TreeNode* node, int sum, vector<int>& path,
+         vector<vector<int>>& result, const int& target) {
+    if (!node) {
+        return;
+    }
+
+    sum += node->val;
+    path.push_back(node->val);
+
+    if (!node->left && !node->right && sum == target) {
+        result.emplace_back(path);
+    } else {
+        dfs(node->left, sum, path, result, target);
+        dfs(node->right, sum, path, result, target);
+    }
+
+    path.pop_back();
+    sum -= node->val;
+
+    return;
+}
+
+class Solution {
+  public:
+    vector<vector<int>> pathSum(TreeNode* root, int targetSum) {
+        vector<int> path;
+        vector<vector<int>> res;
+
+        dfs(root, 0, path, res, targetSum);
+
+        return res;
+    }
+};
+```
+
+</details>
+
+### [210. Course Schedule II (Medium)](/cpp/0210.course-schedule-ii/question.md)
+
+Topological sort from **every** node that has in-degree of 0 in `[0, numCourses-1]`,
+including unused ones.
+
+<details>
+<summary>Code</summary>
+
+```cpp
+unordered_map<int, int> find_indegree(unordered_map<int, vector<int>>& graph) {
+    unordered_map<int, int> indegree;
+    for (auto& entry : graph) {
+        indegree[entry.first] = 0;
+    }
+
+    for (auto& node : graph) {
+        for (auto& neighbor : node.second) {
+            indegree[neighbor] += 1;
+        }
+    }
+
+    return indegree;
+}
+
+class Solution {
+  public:
+    // Topoligical sort
+    vector<int> findOrder(int numCourses, vector<vector<int>>& prerequisites) {
+        int n = prerequisites.size();
+        unordered_map<int, vector<int>> graph;
+        unordered_map<int, int> indegree;
+        // Build graph
+        for (int i = 0; i < n; i++) {
+            graph[prerequisites[i][0]].push_back(prerequisites[i][1]);
+        }
+        // Build indegree
+        for (auto& node : graph) {
+            for (auto& neighbor : node.second) {
+                indegree[neighbor] += 1;
+            }
+        }
+
+        // Topological sort.
+        vector<int> res;
+        queue<int> q;
+        for (int i = 0; i < numCourses; i++) {
+            if (!indegree[i])
+                q.push(i);
+        }
+
+        while (!q.empty()) {
+            int node = q.front();
+
+            res.emplace_back(node);
+            for (const int& neighbor : graph[node]) {
+                indegree[neighbor]--;
+                if (!indegree[neighbor]) {
+                    q.push(neighbor);
+                }
+            }
+            q.pop();
+        }
+
+        reverse(res.begin(), res.end());
+        if (res.size() == numCourses) {
+            return res;
+        } else {
+            return {};
+        }
+    }
+};
+```
+
+</details>
+
+### [102. Binary Tree Level Order Traversal (Medium)](/cpp/0102.binary-tree-level-order-traversal/question.md)
+
+BFS on binary trees. Remember to use level fashion loop..
+
+<details>
+<summary>Code</summary>
+
+```cpp
+class Solution {
+  public:
+    vector<vector<int>> levelOrder(TreeNode* root) {
+        if (!root)
+            return {};
+        queue<TreeNode*> q;
+        vector<vector<int>> res;
+
+        q.push(root);
+
+        while (!q.empty()) {
+            int n = q.size();
+            vector<int> nodes;
+            for (int i = 0; i < n; i++) {
+                TreeNode* node = q.front();
+                nodes.emplace_back(node->val);
+
+                if (node->left)
+                    q.push(node->left);
+                if (node->right)
+                    q.push(node->right);
+
+                q.pop();
+            }
+            res.emplace_back(nodes);
+        }
+
+        return res;
+    }
+};
+```
+
+</details>
+
+### [994. Rotting Oranges (Medium)](/cpp/0994.rotting-oranges/question.md)
+
+BFS explore the grid and stamp time stamps.
+The answer will be maximum timestamp - 2 or
+-1 if any fresh orange left.
+
+<details>
+<summary>Code</summary>
+
+```cpp
+const int dr[4] = {1, 0, -1, 0};
+const int dc[4] = {0, -1, 0, 1};
+
+class Solution {
+  public:
+    int orangesRotting(vector<vector<int>>& grid) {
+        int m = grid.size(), n = grid[0].size(), max_time = 2;
+        queue<pair<int, int>> q;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] == 2) {
+                    q.push({i, j});
+                }
+            }
+        }
+        // BFS on matrix to mark timestamp.
+        while (!q.empty()) {
+
+            auto& cell = q.front();
+
+            for (int i = 0; i < 4; i++) {
+                int nr = cell.first + dr[i];
+                int nc = cell.second + dc[i];
+                if (nr >= 0 && nr < m && nc >= 0 && nc < n &&
+                    grid[nr][nc] == 1) {
+                    grid[nr][nc] = grid[cell.first][cell.second] + 1;
+                    q.push({nr, nc});
+                }
+            }
+
+            q.pop();
+        }
+        // Search the max timestamp & check fresh ones.
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] == 1) {
+                    return -1;
+                }
+                max_time = max(max_time, grid[i][j]);
+            }
+        }
+
+        return max_time - 2;
+    }
+};
+```
+
+</details>
+
+### [127. Word Ladder (Hard)](/cpp/0127.word-ladder/question.md)
+
+Double-ended BFS that returns the level when meet in the middle.
+Edge requirement: hamming distance of 1.
+
+<details>
+<summary>Code</summary>
+
+```cpp
+constexpr int hamming_distance(const string_view& a, const string_view& b,
+                               const int size) {
+    int count = 0;
+    for (int i = 0; i < size; i++) {
+        count += (int)(a[i] != b[i]);
+    }
+
+    return count;
+}
+
+class Solution {
+  public:
+    int ladderLength(string beginWord, string endWord,
+                     vector<string>& wordList) {
+        if (find(wordList.begin(), wordList.end(), endWord) == wordList.end()) {
+            return 0;
+        }
+        int size = beginWord.size();
+        vector<string_view> words(wordList.begin(), wordList.end());
+        // Double-ended BFS
+        unordered_set<string_view> head, tail, next;
+
+        head.reserve(wordList.size() + 1);
+        tail.reserve(wordList.size() + 1);
+        next.reserve(wordList.size() + 1);
+
+        head.emplace(beginWord);
+        tail.emplace(endWord);
+
+        for (int level = 1; !head.empty() && !tail.empty(); level++) {
+            if (head.size() > tail.size()) {
+                head.swap(tail);
+            }
+
+            for (auto p : head) {
+                for (auto q : tail) {
+                    if (hamming_distance(p, q, size) == 1) {
+                        return level + 1;
+                    }
+                }
+
+                int idx = 0;
+                while (idx < words.size()) {
+                    string_view q = words[idx];
+                    if (hamming_distance(p, q, size) != 1) {
+                        idx++;
+                        continue;
+                    }
+
+                    swap(words[idx], words.back());
+                    words.pop_back();
+                    next.insert(q);
+                }
+            }
+            head.swap(next);
+            next.clear();
+        }
+
+        return 0;
+    }
+};
+```
+
+</details>
 
 ## Matrix Traversal
 
+### [733. Flood Fill (Easy)](/cpp/0733.flood-fill/question.md)
+
+Remember to store the source color before writing image.
+Rest is grid BFS on 4 directions.
+
+<details>
+<summary>Code</summary>
+
+```cpp
+const int dr[4] = {1, 0, -1, 0};
+const int dc[4] = {0, -1, 0, 1};
+class Solution {
+  public:
+    vector<vector<int>> floodFill(vector<vector<int>>& image, int sr, int sc,
+                                  int color) {
+        int m = image.size(), n = image[0].size();
+        int source_color = image[sr][sc];
+        if (source_color == color) {
+            return image;
+        }
+        queue<pair<int, int>> q;
+        image[sr][sc] = color;
+        q.emplace(sr, sc);
+
+        while (!q.empty()) {
+            pair<int, int> cell = q.front();
+
+            for (int i = 0; i < 4; i++) {
+                int nr = cell.first + dr[i];
+                int nc = cell.second + dc[i];
+
+                if (nr >= 0 && nr < m && nc >= 0 && nc < n &&
+                    image[nr][nc] == source_color) {
+                    image[nr][nc] = color;
+                    q.emplace(nr, nc);
+                }
+            }
+
+            q.pop();
+        }
+
+        return image;
+    }
+};
+```
+
+</details>
+
+### [200. Number of Islands (Medium)](/cpp/0200.number-of-islands/question.md)
+
+Find a land first then use grid BFS to mark connected lands to 0.
+
+<details>
+<summary>Code</summary>
+
+```cpp
+const int dr[4] = {1, 0, -1, 0};
+const int dc[4] = {0, -1, 0, 1};
+
+void dfs(int sr, int sc, vector<vector<char>>& grid, const int& m,
+         const int& n) {
+    if (sr >= 0 && sr < m && sc >= 0 && sc < n && grid[sr][sc] == '1') {
+        grid[sr][sc] = '0';
+
+        for (int i = 0; i < 4; i++) {
+            dfs(sr + dr[i], sc + dc[i], grid, m, n);
+        }
+    }
+}
+
+class Solution {
+  public:
+    int numIslands(vector<vector<char>>& grid) {
+        if (!grid.size()) {
+            return 0;
+        }
+
+        int m = grid.size(), n = grid[0].size(), count = 0;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] == '1') {
+                    count++;
+                    dfs(i, j, grid, m, n);
+                }
+            }
+        }
+
+        return count;
+    }
+};
+```
+
+</details>
+
+### [130. Surrounded Regions (Medium)](/cpp/0130.surrounded-regions/question.md)
+
+BFS from all open cell from the edge and apply special marker 'E'.
+After that change left 'O' to 'X' (unreachable to edge) and 'E' to 'O'.
+
+<details>
+<summary>Code</summary>
+
+```cpp
+const int dr[4] = {1, 0, -1, 0};
+const int dc[4] = {0, -1, 0, 1};
+void bfs(int sr, int sc, vector<vector<char>>& board, const int& m,
+         const int& n) {
+    queue<pair<int, int>> q;
+    q.emplace(sr, sc);
+
+    while (!q.empty()) {
+        auto [r, c] = q.front();
+        q.pop();
+        if (board[r][c] != 'O')
+            continue;
+
+        board[r][c] = 'E';
+
+        for (int i = 0; i < 4; i++) {
+            int nr = r + dr[i], nc = c + dc[i];
+            if (nr >= 0 && nr < m && nc >= 0 && nc < n) {
+                q.emplace(nr, nc);
+            }
+        }
+    }
+}
+
+class Solution {
+  public:
+    void solve(vector<vector<char>>& board) {
+        int m = board.size();
+        if (!m)
+            return;
+        int n = board[0].size();
+
+        vector<pair<int, int>> border;
+
+        for (int r = 0; r < m; r++) {
+            if (board[r][0] == 'O') {
+                border.emplace_back(r, 0);
+            }
+            if (board[r][n - 1] == 'O') {
+                border.emplace_back(r, n - 1);
+            }
+        }
+        for (int c = 0; c < n; c++) {
+            if (board[0][c] == 'O') {
+                border.emplace_back(0, c);
+            }
+            if (board[m - 1][c] == 'O') {
+                border.emplace_back(m - 1, c);
+            }
+        }
+
+        for (auto [r, c] : border) {
+            bfs(r, c, board, m, n);
+        }
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (board[i][j] == 'O')
+                    board[i][j] = 'X';
+                else if (board[i][j] == 'E')
+                    board[i][j] = 'O';
+            }
+        }
+    }
+};
+```
+
+</details>
 ## Backtracking
 
 ## DP Patterns
